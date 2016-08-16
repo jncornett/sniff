@@ -2,21 +2,29 @@ package main
 
 import "testing"
 
+func string_arrays_equal(lhs []string, rhs []string) bool {
+    if len(lhs) != len(rhs) { return false }
+    for i := range lhs {
+        if lhs[i] != rhs[i] {
+            return false
+        }
+    }
+
+    return true
+}
+
 func TestEventEngineStep(t *testing.T) {
     engine := EventEngine{}
 
     handlerTriggered := false
-    testHandler := func (_ EventEngine) { handlerTriggered = true }
-
-    handle := engine.RegisterHandler("foo.bar", testHandler)
-
-    if handle == nil {
-        t.Error("engine could not register handler")
+    testHandler := func (_ EventTrigger, _ EventName, _ *EventData) {
+        handlerTriggered = true
     }
 
-    engine.TriggerEvent("foo.bar")
+    engine.RegisterHandler("foo.bar", testHandler)
+    engine.Trigger("foo.bar", nil)
 
-    if engine.QueuedEvents() != []string{"foo.bar"} {
+    if !string_arrays_equal(engine.QueuedEvents(), []string{"foo.bar"}) {
         t.Errorf("expected event queue to be %v, got %v", []string{"foo.bar"}, engine.QueuedEvents())
     }
 
@@ -29,9 +37,4 @@ func TestEventEngineStep(t *testing.T) {
     if !handlerTriggered {
         t.Error("expected handler to be triggered")
     }
-}
-
-func TestEventEngineStepWhenEmpty(t *testing.T) {
-    engine := EventEngine{}
-    engine.Step()
 }
