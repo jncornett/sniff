@@ -17,7 +17,7 @@ func TestEventEngineStep(t *testing.T) {
     engine := EventEngine{}
 
     handlerTriggered := false
-    testHandler := func (_ EventTrigger, _ EventName, _ *EventData) {
+    testHandler := func (EventTrigger, string, *EventData) {
         handlerTriggered = true
     }
 

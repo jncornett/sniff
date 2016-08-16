@@ -1,20 +1,24 @@
 package main
 
-type EventName string
-
+// this is a placeholder type for when we actually figure out
+// what data to pass to an event handler
 type EventData struct {}
 
 type EventEngine struct {}
 
+// View that restricts event handler access to EventEngine
 type EventTrigger interface {
-    Trigger(EventName, *EventData)
+    Trigger(string, *EventData)
 }
 
-type EventHandler func(EventTrigger, EventName, *EventData)
+// Event Handler function
+type EventHandler func(EventTrigger, string, *EventData)
 
-func (self EventEngine) RegisterHandler(_ EventName, _ EventHandler) {}
+// EventEngine methods
 
-func (self EventEngine) Trigger(_ EventName, _ *EventData) {}
+func (self EventEngine) RegisterHandler(eventName string, _ EventHandler) {}
+
+func (self EventEngine) Trigger(eventName string, data *EventData) {}
 
 func (self EventEngine) QueuedEvents() []string { return []string{} }
 
