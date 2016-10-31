@@ -2,7 +2,6 @@ package eventing
 
 const (
 	EQ_BUFFER_SIZE = 24
-	MY_ADDRESS     = ":8080"
 )
 
 type Address string
@@ -73,17 +72,17 @@ func MainPublisherLoop(engine *Engine, rpcFunc func(Address, Event)) {
 }
 
 type Service struct {
-	engine *Engine
+	WrappedEngine *Engine
 }
 
 func (self *Service) Push(e *Event, reply *bool) error {
-	self.engine.Push(*e)
+	self.WrappedEngine.Push(*e)
 	*reply = true
 	return nil
 }
 
 func (self *Service) Subscribe(addr *Address, reply *bool) error {
-	self.engine.Subscribe(*addr)
+	self.WrappedEngine.Subscribe(*addr)
 	*reply = true
 	return nil
 }
@@ -95,44 +94,7 @@ func (self *Service) Unsubscribe(addr *Address, reply *bool) error {
 	// of the process. This *may* be a partial solution
 	// to the problem of iterating over the subscribers
 	// that may be mutated by Subscribe/Unsubscribe
-	self.engine.Unsubscribe(*addr)
+	self.WrappedEngine.Unsubscribe(*addr)
 	*reply = true
 	return nil
 }
-
-// func main() {
-// 	engine := NewEngine()
-// 	defer engine.Close()
-
-// 	// wrap in Service interface for export via RPC.
-// 	// (we wouldn't want to expose Engine.Close(), for example
-// 	service := Service{engine}
-// 	rpc.Register(&service)
-// 	rpc.HandleHTTP()
-
-// 	go MainPublisherLoop(engine, func(subscriber Address, e Event) {
-// 		client, err := rpc.DialHTTP("tcp", subscriber.ToString())
-// 		if err != nil {
-// 			log.Printf("dialing %v: %v", subscriber, err)
-// 			// TODO possibly remove subscriber from map?
-// 			// for now, the event is just 'dropped' as far
-// 			// as this specific subscriber is concerned
-// 			return
-// 		}
-// 		var reply bool
-// 		err = client.Call("Subscriber.Push", e, &reply)
-// 		if err != nil {
-// 			log.Printf("dialing %v: %v", subscriber, err)
-// 			return
-// 		}
-// 		if !reply {
-// 			log.Printf("dialing %v, got result %v", subscriber, reply)
-// 		}
-// 	})
-
-// 	ln, err := net.Listen("tcp", MY_ADDRESS)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	http.Serve(ln, nil)
-// }
